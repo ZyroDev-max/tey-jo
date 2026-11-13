@@ -1,0 +1,111 @@
+/* ======================================================================
+   Heart of "I love you" words
+
+   Every word moves along two independent paths on different timings:
+     - X axis: smooth back-and-forth sway
+     - Y axis: a keyframed path shaped like the top and bottom of a heart
+   Combined, with each word delayed a bit more than the previous one,
+   they trace a heart outline.
+   ====================================================================== */
+
+:root {
+  --bg: #000;
+  --accent: #ea80b0;
+  --glow: #fff;
+
+  /* Heart bounding box; scales down on small screens */
+  --size: min(450px, 80vmin);
+
+  /* Timing */
+  --sway-duration: 10s;
+  --fall-duration: 20s;
+  --stagger: 300ms;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  height: 100vh;
+  overflow: hidden;
+  background-color: var(--bg);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Centered stage for the heart */
+.heart {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: var(--size);
+  height: var(--size);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Travelling wrapper: X via `translate`, Y via `transform`,
+   so the two animations never overwrite each other. */
+.heart__item {
+  position: absolute;
+  inset: 0 auto auto 0;
+  width: var(--size);
+  height: var(--size);
+  animation:
+    sway var(--sway-duration) ease-in-out infinite alternate,
+    fall var(--fall-duration) linear infinite;
+  /* Per-item delay is assigned in script.js for broad browser support. */
+  will-change: transform, translate;
+}
+
+.heart__word {
+  display: block;
+  color: var(--accent);
+  font-size: 1.4rem;
+  letter-spacing: 2px;
+  white-space: nowrap;
+  text-shadow: 0 0 10px var(--glow);
+  transform: translateY(-100%) rotate(-30deg);
+}
+
+/* --- Horizontal sway ------------------------------------------------ */
+@keyframes sway {
+  from { translate: 0 0; }
+  to   { translate: var(--size) 0; }
+}
+
+/* --- Vertical heart path -------------------------------------------- */
+/* Values are fractions of --size (0 = top, 1 = bottom). */
+@keyframes fall {
+  0%    { transform: translateY(40%); }
+  10%   { transform: translateY(10%); }
+  15%   { transform: translateY(1%); }
+  18%   { transform: translateY(0); }          /* top of left lobe  */
+  20%   { transform: translateY(1%); }
+  22%   { transform: translateY(7.6923%); }
+  24%   { transform: translateY(14.2857%); }
+  25%   { transform: translateY(25%); }  /* centre dip */
+  26%   { transform: translateY(14.2857%); }
+  28%   { transform: translateY(7.6923%); }
+  30%   { transform: translateY(1%); }
+  32%   { transform: translateY(0); }          /* top of right lobe */
+  35%   { transform: translateY(1%); }
+  40%   { transform: translateY(10%); }
+  50%   { transform: translateY(40%); }
+  71%   { transform: translateY(95.2381%); }
+  72.5% { transform: translateY(98.0392%); }
+  75%   { transform: translateY(100%); } /* bottom tip */
+  77.5% { transform: translateY(98.0392%); }
+  79%   { transform: translateY(95.2381%); }
+  100%  { transform: translateY(40%); }
+}
+
+/* --- Accessibility --------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  .heart__item {
+    animation-duration: 40s, 80s;
+  }
+}
